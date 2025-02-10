@@ -1,19 +1,33 @@
 import {NextFunction, Request, Response} from "express";
-import ffmpeg from "fluent-ffmpeg";
-import stream, {PassThrough, Readable} from "stream";
+// @ts-ignore
+import MP4Box from "mp4box";
 
-const getVideoFileMetadata = (stream: stream.Readable) => new Promise<ffmpeg.FfprobeData>((resolve, reject) => {
-    ffmpeg().input(stream).ffprobe(0, (err, metadata) => {
-        if (err) {
-            console.error(err);
-            reject("error while processing video file");
-        }
-        resolve(metadata);
-    })
-})
+export async function getMp4Params(buffer:  Buffer<ArrayBufferLike>) {
+    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    (arrayBuffer as any).fileStart = 0;
+
+    const mp4boxfile = MP4Box.createFile();
+    return new Promise<{ duration: number; width: number; height: number }>((resolve, reject) => {
+        mp4boxfile.onError = reject;
+        mp4boxfile.onReady = (info: any) => {
+            if (info.videoTracks.length === 0) {
+                return reject(new Error("Файл не содержит видео-дорожек"));
+            }
+
+            const videoTrack = info.videoTracks[0];
+            resolve({
+                duration: info.duration / info.timescale,
+                width: videoTrack.video.width,
+                height: videoTrack.video.height,
+            });
+        };
+
+        mp4boxfile.appendBuffer(arrayBuffer);
+        mp4boxfile.flush();
+    });
+}
 
 let count = 0
-
 
 export const validateMp4 = async (req: Request, res: Response, next: NextFunction) => {
     count++
@@ -29,21 +43,8 @@ export const validateMp4 = async (req: Request, res: Response, next: NextFunctio
         throw new Error("file has wrong format");
     }
 
-    const validateStream = new Readable();
-    validateStream.push(req.file.buffer);
-    validateStream.push(null);
-
-
-    const fileStream = new PassThrough();
-    validateStream.pipe(fileStream)
-
-    req.file.stream = fileStream
-
     try {
-        const metadata = await getVideoFileMetadata(validateStream)
-
-        const { width, height } = metadata.streams.find(s => s.codec_type === "video") || {};
-        const duration = metadata.format.duration || 0;
+        const {width, height, duration} = await getMp4Params(req.file.buffer)
 
         console.log("width",width,"height",height,"duration",duration)
 

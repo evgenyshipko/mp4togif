@@ -94,3 +94,5 @@ worker.on("failed", (job, err) => {
 });
 
 console.info("worker started successfully");
+
+//TODO: после успешного выполнения чистить редис и хранилку

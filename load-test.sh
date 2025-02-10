@@ -2,7 +2,7 @@
 
 URL="http://localhost:3000/upload"   # Адрес вашего сервера
 FILE="./test-video1.mp4"             # Путь к видеофайлу, который будет загружаться
-NUM_REQUESTS=100                     # Количество запросов
+NUM_REQUESTS=1000                     # Количество запросов
 CONCURRENCY=10                       # Количество одновременных запросов
 
 function send_request {
