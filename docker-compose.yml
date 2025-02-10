@@ -8,7 +8,6 @@ services:
       MINIO_ROOT_PASSWORD: admin123
     volumes:
       - minio_data:/data
-      - ./minio-setup.sh:/usr/bin/init.sh
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -90,10 +89,10 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
           memory: 1G
+        reservations:
+          cpus: '0.7'
+          memory: 512M
 
   worker:
     image: localhost:5000/image_worker:latest

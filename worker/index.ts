@@ -2,7 +2,7 @@ import {Job, Worker} from "bullmq";
 import {BULL_CONFIG, CONVERSION_QUEUE_NAME} from "../common/bullConfig";
 import * as path from "node:path";
 import ffmpeg from "fluent-ffmpeg"
-import {BUCKET, s3Client} from "../server/config";
+import {BUCKET, s3Client} from "../server/s3Client";
 import {GetObjectCommand} from "@aws-sdk/client-s3";
 import {Upload} from "@aws-sdk/lib-storage"
 import fs from "fs-extra"
@@ -64,7 +64,7 @@ async function downloadFromS3(videoKey: string, localPath: string) {
     const command = new GetObjectCommand({ Bucket: BUCKET, Key: videoKey });
     const { Body } = await s3Client.send(command);
 
-    if (!Body) throw new Error("Ошибка скачивания видео из MinIO");
+    if (!Body) throw new Error("error downloading from S3");
 
     const writeStream = fs.createWriteStream(localPath);
     await new Promise<void>((resolve, reject) => {
@@ -95,4 +95,3 @@ worker.on("failed", (job, err) => {
 
 console.info("worker started successfully");
 
-//TODO: после успешного выполнения чистить редис и хранилку

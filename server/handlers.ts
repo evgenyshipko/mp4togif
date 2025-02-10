@@ -4,7 +4,7 @@ import {CustomRequest} from "./middlewares/queueMiddleware";
 
 export const uploadHandler = async (req: CustomRequest, res: Response) => {
     if (!req.file) {
-        res.status(400).json({ error: "No file uploaded" });
+        res.status(400).json({ error: "no file uploaded" });
         return
     }
     if (!req.conversionQueue){
@@ -21,7 +21,7 @@ interface StatusRequestParams {
 
 export const getJobStatusHandler = async (req: CustomRequest<StatusRequestParams>, res: Response) => {
     if (!req.conversionQueue){
-        res.status(500).json({ error: "no queue queue" });
+        res.status(500).json({ error: "no queue" });
         return
     }
 

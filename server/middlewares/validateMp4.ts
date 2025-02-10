@@ -11,7 +11,7 @@ export async function getMp4Params(buffer:  Buffer<ArrayBufferLike>) {
         mp4boxfile.onError = reject;
         mp4boxfile.onReady = (info: any) => {
             if (info.videoTracks.length === 0) {
-                return reject(new Error("Файл не содержит видео-дорожек"));
+                return reject(new Error("file does not contain videoTracks"));
             }
 
             const videoTrack = info.videoTracks[0];
@@ -32,7 +32,7 @@ let count = 0
 export const validateMp4 = async (req: Request, res: Response, next: NextFunction) => {
     count++
 
-    console.log(`Запрос №${count}`)
+    console.log(`Request №${count}`)
 
     if (!req.file) {
         res.status(400).json({ error: "no file uploaded" });

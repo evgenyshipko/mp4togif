@@ -7,7 +7,9 @@
     "start:server": "ts-node server/index.ts",
     "start:worker": "ts-node worker/index.ts",
     "create:minio:local": "docker run -p 9000:9000 -p 9001:9001 --name minio \\\n  -e \"MINIO_ROOT_USER=admin\" -e \"MINIO_ROOT_PASSWORD=admin123\" \\\n  -v $(pwd)/data:/data minio/minio server /data --console-address \":9001\"",
-    "create:redis:local": "docker run -p 6379:6379 --name redis -d redis\n"
+    "create:redis:local": "docker run -p 6379:6379 --name redis -d redis\n",
+    "load-test": "/bin/bash ./load-test.sh",
+    "start:swarm-cluster": "/bin/bash ./local-startup.sh"
   },
   "devDependencies": {
     "@types/busboy": "^1.5.4",
@@ -27,7 +29,6 @@
     "@aws-sdk/client-s3": "^3.743.0",
     "@types/express": "^5.0.0",
     "bullmq": "^5.40.1",
-    "busboy": "^1.6.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "fluent-ffmpeg": "^2.1.3",

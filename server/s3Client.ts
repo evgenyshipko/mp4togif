@@ -14,5 +14,3 @@ export const s3Client = new S3Client({
         secretAccessKey: process.env.MINIO_SECRET_KEY!,
     },
 });
-
-// TODO: что-то делать с папкой data
