@@ -4,20 +4,22 @@
 
 1. Install [Docker](https://www.docker.com/)
 2. Start docker swarm cluster ```npm run start:swarm-cluster``` (may be needed```docker swarm init```)
-3. UI will be available on <ADDRESS>
+3. UI will be available on http://localhost:4200/
 
 ### Stack
 
 Frontend:
-* AngularJs as UI-javascript framework
+* **AngularJs** as UI-javascript framework
+* **nginx** as a server for static
 
 Backend: 
-* express.js as server framework
-* multer for handling multipart/form-data from our api
-* Bull and Redis for queues
-* MinIO as S3-like file storage
-* ffmpeg to convert mp4 video to gif
-* mp4box for validate mp4 (is much faster than ffmpeg)
+* **express.js** as server framework
+* **multer** for handling multipart/form-data from our api
+* **Bull** and **Redis** for queues
+* **MinIO** as S3-like file storage
+* **ffmpeg** to convert mp4 video to gif
+* **mp4box** for validate mp4 (is much faster than ffmpeg)
+* **Docker swarm** to run application in containers
 
 ### Backend scheme
 

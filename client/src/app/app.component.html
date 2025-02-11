@@ -1,0 +1,32 @@
+<div style="text-align: center; margin-top: 50px;">
+  <h1>{{ title }}</h1>
+  <div *ngIf="message" class="alert" [ngClass]="{'alert-success': gifUrl, 'alert-danger': !gifUrl}">
+    <p>{{ message }}</p>
+  </div>
+
+  <div class="file-upload">
+    <label for="fileInput" class="btn">Choose Video</label>
+    <input type="file" id="fileInput" (change)="handleFileInput($event)" accept="video/mp4" />
+    <div class="file-name">{{ fileName || 'No file chosen' }}</div>
+  </div>
+  <br />
+  <button class="btn" (click)="onUpload()" [disabled]="isUploading || !fileToUpload">Upload and Convert</button>
+
+  <div *ngIf="isUploading">
+    <p>Uploading...</p>
+  </div>
+
+  <div *ngIf="isUploading">
+    <p>Conversion in progress...</p>
+  </div>
+
+  <div *ngIf="gifUrl">
+    <p>Conversion complete! Download your GIF:</p>
+    <a [href]="gifUrl" target="_blank">Download GIF</a>
+  </div>
+
+  <div *ngIf="gifUrl">
+    <img [src]="gifUrl" target="_blank" />
+  </div>
+</div>
+
