@@ -18,10 +18,9 @@ export const uploadToStorage = async (req: CustomRequest, res: Response, next: N
         uploadToS3(fileStream, cloudFileName, "video/mp4").then(url => {
             console.info(`file uploaded to: ${url}`)
 
-            req.conversionQueue?.add("convert", { videoUrl: url }).catch((err: Error) => {
+            req.conversionQueue?.add("convert", { videoUrl: url, requestId: req.id }).catch((err: Error) => {
                 console.error("ERROR WHEN ADDING TO QUEUE: ", err)
             });
-            // TODO: связыывавть jobID и RequestId где-то (РЕДИС)
         })
 
         next();

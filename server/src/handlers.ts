@@ -12,11 +12,11 @@ export const uploadHandler = async (req: CustomRequest, res: Response) => {
         return
     }
 
-    res.json({ status: "ok" });
+    res.json({ requestId: req.id });
 };
 
 interface StatusRequestParams {
-    jobId: string;
+    requestId: string;
 }
 
 export const getJobStatusHandler = async (req: CustomRequest<StatusRequestParams>, res: Response) => {
@@ -25,15 +25,24 @@ export const getJobStatusHandler = async (req: CustomRequest<StatusRequestParams
         return
     }
 
-    const job = await Job.fromId(req.conversionQueue, req.params.jobId);
-    if (!job){
-        res.status(400).json({ status: "job not found" });
+    const jobId = await req.redis?.get(req.params.requestId)
+
+    if (!jobId){
+        res.status(200).json({ status: "job not proceed" });
         return
     }
+
+    const job = await Job.fromId(req.conversionQueue, jobId);
+    if (!job){
+        res.status(400).json({ error: "job not found" });
+        return
+    }
+
+    const gifUrl = job.returnvalue?.gifUrl?.replace("minio","localhost")
 
     res.json({
         status: job.getState(),
         progress: job.progress,
-        result: job.returnvalue,
+        gifUrl,
     })
 }

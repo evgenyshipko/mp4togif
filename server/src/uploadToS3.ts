@@ -1,4 +1,4 @@
-import {BUCKET, s3Client} from "./s3Client";
+import {BUCKET, s3Client} from "../../common/s3Client";
 import {Upload} from "@aws-sdk/lib-storage"
 import stream from "stream";
 

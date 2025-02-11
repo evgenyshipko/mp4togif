@@ -14,7 +14,7 @@ class Router {
     init() {
         this.router.post("/upload", saveFileInRAM, validateMp4, uploadToStorage, uploadHandler);
 
-        this.router.get("/status/:jobId", getJobStatusHandler);
+        this.router.get("/status/:requestId", getJobStatusHandler);
     }
 }
 

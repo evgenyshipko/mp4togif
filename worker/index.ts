@@ -1,19 +1,28 @@
 import {Job, Worker} from "bullmq";
 import {BULL_CONFIG, CONVERSION_QUEUE_NAME} from "../common/bullConfig";
 import * as path from "node:path";
-import ffmpeg from "fluent-ffmpeg"
-import {BUCKET, s3Client} from "../server/s3Client";
-import {GetObjectCommand} from "@aws-sdk/client-s3";
-import {Upload} from "@aws-sdk/lib-storage"
+import {BUCKET} from "../common/s3Client";
 import fs from "fs-extra"
+import {getRedisClient} from "../common/redisClient";
+import {uploadToS3} from "./src/uploadToS3";
+import {downloadFromS3} from "./src/downloadFromS3";
+import {convertToGif} from "./src/convertToGif";
 
 const TEMP_DIR = path.join(__dirname, "temp");
 fs.ensureDirSync(TEMP_DIR);
 
+type ConversionQueueData = {
+    videoUrl: string,
+    requestId: string
+}
+
 const worker = new Worker(
     CONVERSION_QUEUE_NAME,
-    async (job: Job) => {
-        const videoUrl: string = job.data.videoUrl;
+    async (job: Job<ConversionQueueData>) => {
+        const videoUrl = job.data.videoUrl;
+        const requestId = job.data.requestId;
+
+        getRedisClient().then(client => client.set(requestId, job.id as string))
 
         const videoKey = videoUrl.replace(`${process.env.MINIO_ENDPOINT}/${BUCKET}/`, "");
         const videoName = path.basename(videoKey);
@@ -41,49 +50,6 @@ const worker = new Worker(
     },
     { connection: BULL_CONFIG }
 );
-
-async function uploadToS3(localPath: string, s3Key: string) {
-    const fileStream = fs.createReadStream(localPath);
-    const upload = new Upload({
-        client: s3Client,
-        params: {
-            Bucket: BUCKET,
-            Key: s3Key,
-            Body: fileStream,
-            ACL: "public-read",
-            ContentType: "image/gif",
-        },
-    });
-
-    await upload.done();
-
-    return `${process.env.MINIO_ENDPOINT}/${BUCKET}/${s3Key}`;
-}
-
-async function downloadFromS3(videoKey: string, localPath: string) {
-    const command = new GetObjectCommand({ Bucket: BUCKET, Key: videoKey });
-    const { Body } = await s3Client.send(command);
-
-    if (!Body) throw new Error("error downloading from S3");
-
-    const writeStream = fs.createWriteStream(localPath);
-    await new Promise<void>((resolve, reject) => {
-        (Body as NodeJS.ReadableStream).pipe(writeStream);
-        writeStream.on("finish", resolve);
-        writeStream.on("error", reject);
-    });
-}
-
-async function convertToGif(inputPath: string, outputPath: string) {
-    await new Promise<void>((resolve, reject) => {
-        ffmpeg(inputPath)
-            .output(outputPath)
-            .outputOptions(["-vf", "scale=-1:400", "-r 5"])
-            .on("end", () => resolve())
-            .on("error", reject)
-            .run();
-    });
-}
 
 worker.on("completed", (job) => {
     console.info(`job ${job.id} completed`);
